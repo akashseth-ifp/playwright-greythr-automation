@@ -33,11 +33,26 @@ test.describe('Greythr Automation', () => {
             await page.click('button:has-text("Everyone")');
 
             // Enter EMPLOYEE_NAME in search
-            await page.fill('input[name="searchKey"]', employeeName);
+            await page.fill('input[name=\"searchKey\"]', employeeName);
+
+            // Wait for typeahead results to load
+            await page.waitForSelector('typeahead-container button', { timeout: 5000 }).catch(() => { });
+
             // Click on the result
             // Use filter to find the exact button containing the employee name to avoid partial matches
             // Note: typeahead-container is a tag, so no dot prefix.
-            const employeeBtn = page.locator('typeahead-container button').filter({ has: page.getByText(employeeName, { exact: true }) }).first();
+            // Try employeeName first, then 'Me', and log if neither is found
+            let employeeBtn = page.locator('typeahead-container button').filter({ has: page.getByText(employeeName, { exact: true }) }).first();
+
+            if (await employeeBtn.count() === 0) {
+                console.log(`Employee "${employeeName}" not found, trying "Me"...`);
+                employeeBtn = page.locator('typeahead-container button').filter({ has: page.getByText('Me', { exact: true }) }).first();
+            }
+
+            if (await employeeBtn.count() === 0) {
+                console.error(`Employee not found: Neither "${employeeName}" nor "Me" was found in the search results.`);
+                throw new Error(`Employee not found: Neither "${employeeName}" nor "Me" was found in the search results.`);
+            }
 
             // Ensure the element is in view (handles list scrolling)
             await employeeBtn.scrollIntoViewIfNeeded();

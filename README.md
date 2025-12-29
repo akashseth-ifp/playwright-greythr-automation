@@ -23,13 +23,7 @@ Install dependencies:
 
 ```pnpm install```
 
-Add a .env file with the following environment variables:
-
-```
-LOGIN_ID=
-PASSWORD=
-EMPLOYEE_NAME=
-```
+Rename a .env.example file to .env and add the required environment variables
 
 ## Running Tests
 
